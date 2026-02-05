@@ -1,57 +1,85 @@
 # Workout -> GitHub Heatmap
 
-Sync Strava activities, normalize and aggregate them, and generate GitHub-style calendar heatmaps (SVG) per workout type/year. The heatmaps are embedded in this README and optionally rendered on a GitHub Pages site.
+Sync Strava activities, normalize and aggregate them, and generate GitHub-style calendar heatmaps (SVG) per workout type/year. A single preview is shown in this README, with the full interactive view on GitHub Pages.
 
-## Quick start
+- Live site: [Interactive Heatmaps](https://aspain.github.io/git-sweaty/)
+- Note: The GitHub Pages site is optimized for responsive desktop/mobile viewing.
 
-1. Install deps:
+<!-- HEATMAPS:START -->
+![Run 2026](heatmaps/Run/2026.svg)
+<!-- HEATMAPS:END -->
+
+## Strava App Setup
+
+Create a Strava API application at [Strava API Settings](https://www.strava.com/settings/api). Use `localhost` for the **Authorization Callback Domain**.
+
+## Quick start (GitHub Actions only)
+
+Forking the repo is enough for this setup; no local clone is required. You can run everything from GitHub Actions. Clone locally only if you want to customize or run the scripts yourself.
+
+1. Generate a **refresh token** via OAuth (the token shown on the Strava API page often does **not** work):
+
+Open this URL in your browser (replace `CLIENT_ID`):
+
+```
+https://www.strava.com/oauth/authorize?client_id=CLIENT_ID&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read,activity:read_all
+```
+
+After approval you’ll be redirected to a `localhost` URL that won’t load. That’s expected. Copy the `code` from the URL and exchange it:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+curl -X POST https://www.strava.com/oauth/token \
+  -d client_id=CLIENT_ID \
+  -d client_secret=CLIENT_SECRET \
+  -d code=THE_CODE_FROM_THE_URL \
+  -d grant_type=authorization_code
 ```
 
-2. Add your Strava credentials to `config.local.yaml` (this file is ignored by git):
+Copy the `refresh_token` from the response.
 
-```yaml
-strava:
-  client_id: "YOUR_CLIENT_ID"
-  client_secret: "YOUR_CLIENT_SECRET"
-  refresh_token: "YOUR_REFRESH_TOKEN"
-```
+2. Add GitHub secrets (repo → Settings → Secrets and variables → Actions):
+- `STRAVA_CLIENT_ID`
+- `STRAVA_CLIENT_SECRET`
+- `STRAVA_REFRESH_TOKEN` (from the OAuth exchange above)
 
-3. Run the pipeline:
-
-```bash
-python scripts/run_pipeline.py --commit
-```
+3. Run the workflow:
+Go to **Actions → Sync Strava Heatmaps → Run workflow**.
 
 This will:
-- sync raw activities into `activities/raw/`
-- normalize into `data/activities_normalized.json`
+- sync raw activities into `activities/raw/` (local-only; not committed)
+- normalize + merge into `data/activities_normalized.json` (persisted history)
 - aggregate into `data/daily_aggregates.json`
 - generate SVGs in `heatmaps/`
-- update the README heatmap section
 - build `site/data.json`
 - commit the changes (one commit per run)
 
+## GitHub Pages setup
+
+1. Go to **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Run the workflow once (Actions → Sync Strava Heatmaps). The **Deploy Pages** workflow will publish `site/` automatically.
+4. Your site will be available at `https://<your-username>.github.io/<repo-name>/` once the deploy finishes.
+
 ## Configuration
 
-Base settings live in `config.yaml`. Put secrets in `config.local.yaml`.
+Base settings live in `config.yaml`. Secrets are injected by GitHub Actions at runtime (no local `config.local.yaml` needed).
 
 Key options:
 - `sync.lookback_years` (default 5)
 - `sync.start_date` (YYYY-MM-DD, overrides lookback_years)
 - `sync.recent_days` (sync recent activities even while backfilling)
 - `sync.resume_backfill` (persist cursor to continue older pages across days)
-- `activities.types` (activity types to include)
-- `activities.type_aliases` (map Strava types to your canonical types)
+- `activities.types` (featured activity types shown first in UI)
+- `activities.include_all_types` (include non-featured Strava types; default `false`)
+- `activities.group_other_types` (auto-group non-featured types into smart categories)
+- `activities.other_bucket` (fallback group name when no smart match is found)
+- `activities.group_aliases` (optional explicit map of a raw/canonical type to a group)
+- `activities.type_aliases` (map Strava types to your canonical types before grouping)
 - `units.distance` (`mi` or `km`)
 - `units.elevation` (`ft` or `m`)
 - `rate_limits.*` (free Strava API throttling caps)
 
-## GitHub Actions (optional)
+## GitHub Actions
 
 Add secrets to your repo:
 - `STRAVA_CLIENT_ID`
@@ -62,35 +90,6 @@ Then enable the scheduled workflow in `.github/workflows/sync.yml`.
 
 ## Notes
 
-- `activities/raw/` contains raw Strava payloads. Keep or prune based on your privacy needs.
-- SVGs are deterministic and contain `<title>` tooltips for hover details.
-- README updates automatically between `<!-- HEATMAPS:START -->` and `<!-- HEATMAPS:END -->`.
+- Raw activities are stored locally for processing but are not committed (`activities/raw/` is ignored). This prevents publishing detailed per‑activity payloads and gps location traces.
+- On first run for a new athlete, the workflow auto-resets persisted outputs (`data/*.json`, `heatmaps/`, `site/data.json`) to avoid mixing data across forks. A fingerprint-only file is stored at `data/athletes.json` and does not include athlete IDs or profile data.
 - The sync script rate-limits to free Strava API caps (200 overall / 15 min, 2,000 overall daily; 100 read / 15 min, 1,000 read daily). Initial backfill may take multiple days; the cursor is stored in `data/backfill_state.json` and resumes automatically. Once backfill is complete, only the recent sync runs.
-
-<!-- HEATMAPS:START -->
-## Heatmaps
-
-### Run
-
-![Run 2026](heatmaps/Run/2026.svg)
-![Run 2025](heatmaps/Run/2025.svg)
-![Run 2024](heatmaps/Run/2024.svg)
-![Run 2023](heatmaps/Run/2023.svg)
-![Run 2022](heatmaps/Run/2022.svg)
-
-### Ride
-
-![Ride 2026](heatmaps/Ride/2026.svg)
-![Ride 2025](heatmaps/Ride/2025.svg)
-![Ride 2024](heatmaps/Ride/2024.svg)
-![Ride 2023](heatmaps/Ride/2023.svg)
-![Ride 2022](heatmaps/Ride/2022.svg)
-
-### WeightTraining
-
-![WeightTraining 2026](heatmaps/WeightTraining/2026.svg)
-![WeightTraining 2025](heatmaps/WeightTraining/2025.svg)
-![WeightTraining 2024](heatmaps/WeightTraining/2024.svg)
-![WeightTraining 2023](heatmaps/WeightTraining/2023.svg)
-![WeightTraining 2022](heatmaps/WeightTraining/2022.svg)
-<!-- HEATMAPS:END -->

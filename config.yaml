@@ -25,6 +25,10 @@ activities:
     - Run
     - Ride
     - WeightTraining
+  include_all_types: false  # set true to ingest non-featured Strava types too
+  group_other_types: true   # when true, map non-featured types into smart buckets
+  other_bucket: OtherSports # fallback bucket for unknown activity categories
+  group_aliases: {}         # optional explicit group overrides, e.g. {SkiErg: WinterSports}
   type_aliases:
     TrailRun: Run
     VirtualRun: Run
