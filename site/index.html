@@ -310,7 +310,7 @@
 
       .more-stats {
         --axis-gap: 8px;
-        --label-row-height: calc(var(--cell) * 1.2);
+        --label-row-height: 18px;
         --label-gap: 0px;
         --label-gap-rotated: 10px;
         display: grid;
@@ -331,7 +331,7 @@
         display: block;
         grid-column: 1;
         grid-row: 2;
-        margin-top: -14px;
+        margin-top: 0;
       }
 
       .more-stats-grid {
@@ -713,6 +713,8 @@
           flex: 0 1 auto;
         }
         .more-stats {
+          --axis-width: 32px;
+          --label-row-height: 16px;
           --label-gap-rotated: 8px;
           grid-template-columns: 1fr;
           grid-template-rows: auto auto auto;

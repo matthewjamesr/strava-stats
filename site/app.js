@@ -961,8 +961,6 @@ function buildYearMatrix(years, colLabels, matrixValues, color, options = {}) {
     yLabel.textContent = String(year);
     yLabel.style.height = "var(--cell)";
     yLabel.style.lineHeight = "var(--cell)";
-    yLabel.style.width = "var(--axis-width)";
-    yLabel.style.paddingRight = "var(--axis-gap)";
     dayCol.appendChild(yLabel);
   });
 
@@ -985,7 +983,6 @@ function buildYearMatrix(years, colLabels, matrixValues, color, options = {}) {
     xLabel.className = "month-label axis-x-label";
     xLabel.textContent = label;
     xLabel.style.left = `calc(${colIndex} * (var(--cell) + var(--gap)))`;
-    xLabel.style.top = "calc(var(--label-row-height) - 16px)";
     if (options.rotateLabels) {
       xLabel.classList.add("diagonal");
     }
