@@ -19,8 +19,6 @@ AGG_PATH = os.path.join("data", "daily_aggregates.json")
 ACTIVITIES_PATH = os.path.join("data", "activities_normalized.json")
 README_PATH = "README.md"
 SITE_DATA_PATH = os.path.join("site", "data.json")
-README_PREVIEW_TYPE = "AllWorkouts"
-README_PREVIEW_YEAR = 2025
 README_PREVIEW_IMAGE_PATH = os.path.join("site", "readme-preview.png")
 
 CELL = 12
@@ -39,10 +37,6 @@ YEAR_LABEL_COLOR = "#e5e7eb"
 LABEL_COLOR = "#f1f5f9"
 BG_COLOR = "#0f172a"
 GRID_BG_COLOR = "rgba(15, 23, 42, 0.8)"
-CARD_BG_COLOR = "rgba(255, 255, 255, 0.06)"
-CARD_BORDER_COLOR = "rgba(148, 163, 184, 0.2)"
-CARD_RADIUS = 14
-ALL_WORKOUTS_ACCENT = "#b967ff"
 LABEL_FONT = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
 
 
@@ -162,43 +156,12 @@ def _type_totals(aggregates_years: Dict) -> Dict[str, int]:
     return totals
 
 
-def _combine_year_entries(year_data: Dict[str, Dict[str, Dict]]) -> Dict[str, Dict]:
-    combined: Dict[str, Dict] = {}
-    for activity_type, entries in (year_data or {}).items():
-        for date_str, entry in (entries or {}).items():
-            if date_str not in combined:
-                combined[date_str] = {
-                    "count": 0,
-                    "distance": 0.0,
-                    "moving_time": 0.0,
-                    "elevation_gain": 0.0,
-                    "activity_ids": [],
-                    "_types": set(),
-                }
-            bucket = combined[date_str]
-            bucket["count"] += int(entry.get("count", 0))
-            bucket["distance"] += float(entry.get("distance", 0.0))
-            bucket["moving_time"] += float(entry.get("moving_time", 0.0))
-            bucket["elevation_gain"] += float(entry.get("elevation_gain", 0.0))
-            if int(entry.get("count", 0)) > 0:
-                bucket["_types"].add(activity_type)
-
-    result: Dict[str, Dict] = {}
-    for date_str, entry in combined.items():
-        types = sorted(entry.pop("_types", set()))
-        entry["types"] = types
-        result[date_str] = entry
-    return result
-
-
 def _svg_for_year(
     year: int,
     entries: Dict[str, Dict],
     units: Dict[str, str],
     colors: List[str],
     color_for_entry: Optional[Callable[[Dict], str]] = None,
-    card_fill: Optional[str] = None,
-    card_stroke: Optional[str] = None,
 ) -> str:
     start = _sunday_on_or_before(date(year, 1, 1))
     end = _saturday_on_or_after(date(year, 12, 31))
@@ -230,12 +193,6 @@ def _svg_for_year(
     lines.append(
         f'<rect width="{width}" height="{height}" fill="{BG_COLOR}"/>'
     )
-    if card_fill:
-        stroke_attr = f' stroke="{card_stroke}"' if card_stroke else ""
-        lines.append(
-            f'<rect width="{width}" height="{height}" rx="{CARD_RADIUS}" ry="{CARD_RADIUS}" '
-            f'fill="{card_fill}"{stroke_attr}/>'
-        )
     lines.append(
         f'<rect x="{grid_bg_x}" y="{grid_bg_y}" width="{grid_width}" height="{grid_height}" '
         f'rx="12" ry="12" fill="{GRID_BG_COLOR}"/>'
@@ -309,22 +266,6 @@ def _svg_for_year(
     lines.append("</g>")
     lines.append("</svg>")
     return "\n".join(lines) + "\n"
-
-
-def _all_workouts_preview_color(entry: Dict, type_meta: Dict[str, Dict[str, str]]) -> str:
-    count = int(entry.get("count", 0))
-    if count <= 0:
-        return DEFAULT_COLORS[0]
-
-    types = entry.get("types") or []
-    if len(types) == 1:
-        activity_type = types[0]
-        return type_meta.get(activity_type, {}).get("accent", ALL_WORKOUTS_ACCENT)
-
-    if len(types) > 1:
-        return ALL_WORKOUTS_ACCENT
-
-    return ALL_WORKOUTS_ACCENT
 
 
 def _readme_section() -> str:
@@ -409,21 +350,6 @@ def generate():
             path = os.path.join(type_dir, f"{year}.svg")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(svg)
-
-    preview_dir = os.path.join("heatmaps", README_PREVIEW_TYPE)
-    ensure_dir(preview_dir)
-    preview_entries = _combine_year_entries(aggregate_years.get(str(README_PREVIEW_YEAR), {}))
-    preview_svg = _svg_for_year(
-        README_PREVIEW_YEAR,
-        preview_entries,
-        units,
-        _color_scale(ALL_WORKOUTS_ACCENT),
-        color_for_entry=lambda entry: _all_workouts_preview_color(entry, type_meta),
-        card_fill=CARD_BG_COLOR,
-        card_stroke=CARD_BORDER_COLOR,
-    )
-    with open(os.path.join(preview_dir, f"{README_PREVIEW_YEAR}.svg"), "w", encoding="utf-8") as f:
-        f.write(preview_svg)
 
     _update_readme()
 
