@@ -257,13 +257,14 @@
       }
 
       .filter-clear-button:hover:not(:disabled) {
-        border-color: rgba(148, 163, 184, 0.6);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
       }
 
       .filter-clear-button:disabled {
         color: rgba(148, 163, 184, 0.85);
         opacity: 0.65;
-        cursor: not-allowed;
+        cursor: default;
       }
 
       .repo-link {
