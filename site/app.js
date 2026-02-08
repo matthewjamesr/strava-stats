@@ -80,6 +80,32 @@ function resetStackedStatsOffset(statsColumn) {
   statsColumn.style.maxWidth = "";
 }
 
+function getLeftMostLabelOffset(container, labels) {
+  if (!container || !labels?.length) return null;
+  const containerRect = container.getBoundingClientRect();
+  if (!Number.isFinite(containerRect.left)) return null;
+
+  const minLeft = labels.reduce((currentMin, label) => {
+    const { left } = label.getBoundingClientRect();
+    if (!Number.isFinite(left)) return currentMin;
+    return Math.min(currentMin, left);
+  }, Number.POSITIVE_INFINITY);
+
+  if (!Number.isFinite(minLeft)) return null;
+  return Math.max(0, Math.round(minLeft - containerRect.left));
+}
+
+function pinStackedStatsToLabelEdge(statsColumn, container, labels) {
+  if (!statsColumn) return;
+  const offset = getLeftMostLabelOffset(container, labels);
+  if (!Number.isFinite(offset)) {
+    resetStackedStatsOffset(statsColumn);
+    return;
+  }
+  statsColumn.style.marginLeft = `${offset}px`;
+  statsColumn.style.maxWidth = `calc(100% - ${offset}px)`;
+}
+
 let frequencyLastViewportWidth = window.innerWidth;
 let frequencyStackLocks = new Map();
 let yearLastViewportWidth = window.innerWidth;
@@ -405,28 +431,29 @@ function alignStackedStatsToYAxisLabels() {
   syncSectionStackingMode();
 
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
+    const body = card.querySelector(".card-body");
     const heatmapArea = card.querySelector(".heatmap-area");
+    const yLabels = Array.from(card.querySelectorAll(".heatmap-area .day-col .day-label"));
     const statsColumn = card.querySelector(".card-stats.side-stats-column");
-    if (!heatmapArea || !statsColumn) return;
+    if (!body || !heatmapArea || !statsColumn) return;
 
     const heatmapBottom = heatmapArea.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
     const isStacked = statsTop >= heatmapBottom - 1;
-    // Keep stacked stats fixed to CSS left pinning; no dynamic horizontal nudges.
     if (isStacked) {
-      resetStackedStatsOffset(statsColumn);
+      pinStackedStatsToLabelEdge(statsColumn, body, yLabels);
       return;
     }
     resetStackedStatsOffset(statsColumn);
   });
 
   heatmaps.querySelectorAll(".more-stats").forEach((card) => {
+    const yLabels = Array.from(card.querySelectorAll(".more-stats-body .axis-day-col .axis-y-label"));
     const graphBody = card.querySelector(".more-stats-body");
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
     if (!graphBody || !statsColumn) return;
     if (card.classList.contains("more-stats-stacked")) {
-      // In stacked mode, keep facts naturally pinned to the left column start.
-      resetStackedStatsOffset(statsColumn);
+      pinStackedStatsToLabelEdge(statsColumn, card, yLabels);
       return;
     }
 
@@ -434,8 +461,7 @@ function alignStackedStatsToYAxisLabels() {
     const statsTop = statsColumn.getBoundingClientRect().top;
     const isStacked = statsTop >= graphBottom - 1;
     if (isStacked) {
-      // CSS handles stacked positioning; avoid resize-dependent JS drift.
-      resetStackedStatsOffset(statsColumn);
+      pinStackedStatsToLabelEdge(statsColumn, card, yLabels);
       return;
     }
     resetStackedStatsOffset(statsColumn);
