@@ -511,7 +511,7 @@
         --more-stats-base-shift: 6px;
         --more-stats-followup-shift: 6px;
         --axis-gap: 8px;
-        --label-row-height: 18px;
+        --label-row-height: var(--heatmap-label-row-height);
         --label-gap: 0px;
         --label-gap-rotated: 10px;
         display: grid;
@@ -579,7 +579,7 @@
       .heatmap-area {
         display: inline-grid;
         grid-template-columns: var(--heatmap-axis-col) max-content;
-        grid-template-rows: 18px auto;
+        grid-template-rows: var(--heatmap-label-row-height) auto;
         column-gap: 8px;
         row-gap: 0;
         align-items: start;
@@ -606,7 +606,7 @@
         position: relative;
         grid-column: 2;
         grid-row: 1;
-        height: 18px;
+        height: var(--heatmap-label-row-height);
         width: max-content;
       }
 
@@ -857,20 +857,15 @@
           right: 14px;
           z-index: 2;
           font-size: 14px;
-          line-height: 1;
+          line-height: 1.15;
+          width: auto;
+          padding-bottom: 2px;
           text-align: left;
           white-space: nowrap;
+          text-wrap: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           pointer-events: none;
-        }
-
-        .labeled-card-row-frequency .labeled-card-title {
-          width: auto;
-          line-height: 1.15;
-          padding-bottom: 2px;
-          white-space: nowrap;
-          text-wrap: nowrap;
         }
 
         .year-card .card-body {
@@ -878,7 +873,7 @@
         }
 
         .year-card .heatmap-area {
-          transform: translate(-10px, -4px);
+          transform: translateX(-10px);
         }
 
         .year-card .card-stats.side-stats-column {
@@ -893,7 +888,7 @@
         }
 
         .more-stats-body {
-          transform: translate(-10px, -8px);
+          transform: translateX(-10px);
         }
 
         .more-stats .side-stats-column {
@@ -983,15 +978,6 @@
         .labeled-card-title {
           font-size: clamp(10px, 1.8vw, 12px);
         }
-        .labeled-card-row-year .year-card .heatmap-area {
-          margin-top: 4px;
-        }
-      }
-
-      @media (min-width: 721px) and (max-width: 900px) {
-        .labeled-card-row-year .year-card .heatmap-area {
-          transform: translate(-10px, 0);
-        }
       }
 
       @media (max-width: 720px) {
@@ -1076,7 +1062,8 @@
           right: clamp(10px, 3vw, 14px);
           z-index: 2;
           font-size: clamp(8px, 2.6vw, 11px);
-          line-height: 1;
+          line-height: 1.15;
+          padding-bottom: 2px;
           pointer-events: none;
           white-space: nowrap;
           overflow: hidden;
@@ -1084,16 +1071,8 @@
           text-align: left;
           margin-left: 0;
         }
-        .labeled-card-row-frequency .labeled-card-title {
-          line-height: 1.15;
-          padding-bottom: 2px;
-        }
         .heatmap-area {
           grid-template-columns: var(--heatmap-axis-col) max-content;
-          grid-template-rows: 16px auto;
-        }
-        .month-row {
-          height: 16px;
         }
         .day-label {
           font-size: 9px;
@@ -1143,7 +1122,7 @@
         }
         .more-stats {
           --axis-width: 32px;
-          --label-row-height: 16px;
+          --label-row-height: var(--heatmap-label-row-height);
           --more-stats-base-shift: 6px;
           --more-stats-followup-shift: 0px;
           --label-gap-rotated: 8px;
