@@ -689,10 +689,10 @@ function buildLabeledCardRow(label, card, kind) {
   }
 
   const title = document.createElement("div");
-  title.className = "labeled-card-title";
+  title.className = "card-title labeled-card-title";
   title.textContent = label;
 
-  row.appendChild(title);
+  card.insertBefore(title, card.firstChild);
   row.appendChild(card);
   return row;
 }
