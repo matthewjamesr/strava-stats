@@ -228,16 +228,9 @@ let yearLastViewportWidth = window.innerWidth;
 let yearStackLocks = new Map();
 let statsWidthLastViewportWidth = window.innerWidth;
 let statsWidthLock = 0;
+let yearDesktopEdgeLastViewportWidth = window.innerWidth;
 let yearDesktopTransformLocks = new Map();
 let yearDesktopInsetLocks = new Map();
-
-function getYearCardLockKey(listIndex, yearCard, yearIndex) {
-  const title = yearCard
-    ?.querySelector(".card-title.labeled-card-title")
-    ?.textContent
-    ?.trim();
-  return `${listIndex}:${title || yearIndex}`;
-}
 
 function normalizeSummaryStatCardWidths() {
   if (!heatmaps) return;
@@ -493,9 +486,9 @@ function alignFrequencyFactsToYearCardEdge() {
   });
 }
 
-function alignYearStatsToFrequencyEdge() {
+function alignYearStatsToFrequencyEdge(narrowing = false) {
   if (!heatmaps) return;
-  const nextLocks = new Map(yearDesktopTransformLocks);
+  const nextLocks = new Map();
 
   const allYearStats = Array.from(
     heatmaps.querySelectorAll(".labeled-card-row-year .year-card .card-stats.side-stats-column"),
@@ -506,7 +499,7 @@ function alignYearStatsToFrequencyEdge() {
 
   const desktop = window.matchMedia("(min-width: 721px)").matches;
   if (!desktop) {
-    yearDesktopTransformLocks = new Map();
+    yearDesktopTransformLocks = nextLocks;
     return;
   }
 
@@ -530,9 +523,9 @@ function alignYearStatsToFrequencyEdge() {
       if (yearStacked !== frequencyStacked) return;
       if (yearStacked) return;
 
-      const lockKey = getYearCardLockKey(listIndex, yearCard, yearIndex);
+      const lockKey = `${listIndex}:${yearIndex}`;
       let shift = null;
-      if (yearDesktopTransformLocks.has(lockKey)) {
+      if (narrowing && yearDesktopTransformLocks.has(lockKey)) {
         shift = yearDesktopTransformLocks.get(lockKey);
       } else {
         const currentLeft = statsColumn.getBoundingClientRect().left;
@@ -551,10 +544,10 @@ function alignYearStatsToFrequencyEdge() {
   yearDesktopTransformLocks = nextLocks;
 }
 
-function applyDesktopStatsRightInset() {
+function applyDesktopStatsRightInset(narrowing = false) {
   if (!heatmaps) return;
   const desktop = window.matchMedia("(min-width: 721px)").matches;
-  const nextYearInsetLocks = new Map(yearDesktopInsetLocks);
+  const nextYearInsetLocks = new Map();
 
   heatmaps.querySelectorAll(".type-list").forEach((list, listIndex) => {
     list.querySelectorAll(".labeled-card-row-year .year-card").forEach((card, yearIndex) => {
@@ -567,9 +560,9 @@ function applyDesktopStatsRightInset() {
       const stacked = card.classList.contains("year-card-stacked");
       if (!desktop || stacked) return;
 
-      const lockKey = getYearCardLockKey(listIndex, card, yearIndex);
+      const lockKey = `${listIndex}:${yearIndex}`;
       let inset = null;
-      if (yearDesktopInsetLocks.has(lockKey)) {
+      if (narrowing && yearDesktopInsetLocks.has(lockKey)) {
         inset = yearDesktopInsetLocks.get(lockKey);
       } else {
         inset = getDesktopStatsRightInset(statsColumn, body, yLabels);
@@ -582,7 +575,7 @@ function applyDesktopStatsRightInset() {
       nextYearInsetLocks.set(lockKey, inset);
     });
   });
-  yearDesktopInsetLocks = desktop ? nextYearInsetLocks : new Map();
+  yearDesktopInsetLocks = nextYearInsetLocks;
 
   heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
@@ -596,6 +589,8 @@ function applyDesktopStatsRightInset() {
 
 function alignStackedStatsToYAxisLabels() {
   if (!heatmaps) return;
+  const viewportWidth = window.innerWidth;
+  const narrowing = viewportWidth < yearDesktopEdgeLastViewportWidth;
   syncFrequencyStackingMode();
   normalizeSummaryStatCardWidths();
   syncFrequencyStackingMode();
@@ -645,8 +640,9 @@ function alignStackedStatsToYAxisLabels() {
     resetStackedStatsOffset(statsColumn);
   });
 
-  alignYearStatsToFrequencyEdge();
-  applyDesktopStatsRightInset();
+  alignYearStatsToFrequencyEdge(narrowing);
+  applyDesktopStatsRightInset(narrowing);
+  yearDesktopEdgeLastViewportWidth = viewportWidth;
 }
 
 function sundayOnOrBefore(d) {
