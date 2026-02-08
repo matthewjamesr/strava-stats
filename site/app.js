@@ -194,7 +194,7 @@ function resetDesktopRightInset(statsColumn) {
 }
 
 function balanceDesktopStatsRightInset(statsColumn, container, labels) {
-  if (!statsColumn || !container || !labels?.length) return 0;
+  if (!statsColumn || !container || !labels?.length) return;
 
   const containerLeft = getContentBoxLeft(container);
   const containerRight = getContentBoxRight(container);
@@ -206,12 +206,15 @@ function balanceDesktopStatsRightInset(statsColumn, container, labels) {
     || !Number.isFinite(labelLeft)
     || !Number.isFinite(statsRight)
   ) {
-    return 0;
+    return;
   }
 
   const leftGap = labelLeft - containerLeft;
   const rightGap = containerRight - statsRight;
-  return Math.max(0, Math.round(leftGap - rightGap));
+  const inset = Math.max(0, Math.round(leftGap - rightGap));
+  if (inset > 0) {
+    statsColumn.style.marginRight = `${inset}px`;
+  }
 }
 
 let frequencyLastViewportWidth = window.innerWidth;
@@ -220,11 +223,6 @@ let yearLastViewportWidth = window.innerWidth;
 let yearStackLocks = new Map();
 let statsWidthLastViewportWidth = window.innerWidth;
 let statsWidthLock = 0;
-let yearEdgeLastViewportWidth = window.innerWidth;
-let yearEdgeShiftLocks = new Map();
-let statsInsetLastViewportWidth = window.innerWidth;
-let yearInsetLocks = new Map();
-let frequencyInsetLocks = new Map();
 
 function normalizeSummaryStatCardWidths() {
   if (!heatmaps) return;
@@ -482,9 +480,6 @@ function alignFrequencyFactsToYearCardEdge() {
 
 function alignYearStatsToFrequencyEdge() {
   if (!heatmaps) return;
-  const viewportWidth = window.innerWidth;
-  const narrowing = viewportWidth <= yearEdgeLastViewportWidth;
-  const nextLocks = new Map();
 
   const allYearStats = Array.from(
     heatmaps.querySelectorAll(".labeled-card-row-year .year-card .card-stats.side-stats-column"),
@@ -494,13 +489,9 @@ function alignYearStatsToFrequencyEdge() {
   });
 
   const desktop = window.matchMedia("(min-width: 721px)").matches;
-  if (!desktop) {
-    yearEdgeShiftLocks = new Map();
-    yearEdgeLastViewportWidth = viewportWidth;
-    return;
-  }
+  if (!desktop) return;
 
-  heatmaps.querySelectorAll(".type-list").forEach((list, listIndex) => {
+  heatmaps.querySelectorAll(".type-list").forEach((list) => {
     const frequencyCard = list.querySelector(".labeled-card-row-frequency .more-stats");
     const frequencyFacts = list.querySelector(
       ".labeled-card-row-frequency .more-stats .more-stats-facts.side-stats-column",
@@ -513,7 +504,7 @@ function alignYearStatsToFrequencyEdge() {
     const targetLeft = frequencyFacts.getBoundingClientRect().left;
     if (!Number.isFinite(targetLeft)) return;
 
-    list.querySelectorAll(".labeled-card-row-year .year-card").forEach((yearCard, yearIndex) => {
+    list.querySelectorAll(".labeled-card-row-year .year-card").forEach((yearCard) => {
       const statsColumn = yearCard.querySelector(".card-stats.side-stats-column");
       if (!statsColumn) return;
       const yearStacked = yearCard.classList.contains("year-card-stacked");
@@ -522,71 +513,36 @@ function alignYearStatsToFrequencyEdge() {
       const currentLeft = statsColumn.getBoundingClientRect().left;
       if (!Number.isFinite(currentLeft)) return;
 
-      const key = `${listIndex}:${yearIndex}`;
-      const computedShift = Math.round(targetLeft - currentLeft);
-      const lockedShift = yearEdgeShiftLocks.get(key);
-      const shift = narrowing && Number.isFinite(lockedShift)
-        ? lockedShift
-        : computedShift;
+      const shift = Math.round(targetLeft - currentLeft);
       if (shift !== 0) {
         statsColumn.style.transform = `translateX(${shift}px)`;
       }
-      nextLocks.set(key, shift);
     });
   });
-
-  yearEdgeShiftLocks = nextLocks;
-  yearEdgeLastViewportWidth = viewportWidth;
 }
 
 function applyDesktopStatsRightInset() {
   if (!heatmaps) return;
   const desktop = window.matchMedia("(min-width: 721px)").matches;
-  const viewportWidth = window.innerWidth;
-  const narrowing = viewportWidth <= statsInsetLastViewportWidth;
-  const nextYearInsets = new Map();
-  const nextFrequencyInsets = new Map();
 
-  heatmaps.querySelectorAll(".year-card").forEach((card, index) => {
+  heatmaps.querySelectorAll(".year-card").forEach((card) => {
     const body = card.querySelector(".card-body");
     const statsColumn = card.querySelector(".card-stats.side-stats-column");
     const yLabels = Array.from(card.querySelectorAll(".heatmap-area .day-col .day-label"));
     if (!body || !statsColumn) return;
     resetDesktopRightInset(statsColumn);
     if (!desktop || card.classList.contains("year-card-stacked")) return;
-    const key = String(index);
-    const computedInset = balanceDesktopStatsRightInset(statsColumn, body, yLabels);
-    const lockedInset = yearInsetLocks.get(key);
-    const inset = narrowing && Number.isFinite(lockedInset)
-      ? lockedInset
-      : computedInset;
-    if (inset > 0) {
-      statsColumn.style.marginRight = `${inset}px`;
-    }
-    nextYearInsets.set(key, inset);
+    balanceDesktopStatsRightInset(statsColumn, body, yLabels);
   });
 
-  heatmaps.querySelectorAll(".more-stats").forEach((card, index) => {
+  heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
     const yLabels = Array.from(card.querySelectorAll(".more-stats-body .axis-day-col .axis-y-label"));
     if (!statsColumn) return;
     resetDesktopRightInset(statsColumn);
     if (!desktop || card.classList.contains("more-stats-stacked")) return;
-    const key = String(index);
-    const computedInset = balanceDesktopStatsRightInset(statsColumn, card, yLabels);
-    const lockedInset = frequencyInsetLocks.get(key);
-    const inset = narrowing && Number.isFinite(lockedInset)
-      ? lockedInset
-      : computedInset;
-    if (inset > 0) {
-      statsColumn.style.marginRight = `${inset}px`;
-    }
-    nextFrequencyInsets.set(key, inset);
+    balanceDesktopStatsRightInset(statsColumn, card, yLabels);
   });
-
-  yearInsetLocks = desktop ? nextYearInsets : new Map();
-  frequencyInsetLocks = desktop ? nextFrequencyInsets : new Map();
-  statsInsetLastViewportWidth = viewportWidth;
 }
 
 function alignStackedStatsToYAxisLabels() {
