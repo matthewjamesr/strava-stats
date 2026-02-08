@@ -865,7 +865,8 @@
           pointer-events: none;
         }
 
-        .labeled-card-row-frequency .labeled-card-title {
+        .labeled-card-row-frequency .labeled-card-title,
+        .labeled-card-row-year .labeled-card-title {
           width: auto;
           line-height: 1.15;
           padding-bottom: 2px;
@@ -983,15 +984,6 @@
         .labeled-card-title {
           font-size: clamp(10px, 1.8vw, 12px);
         }
-        .labeled-card-row-year .year-card .heatmap-area {
-          margin-top: 4px;
-        }
-      }
-
-      @media (min-width: 721px) and (max-width: 900px) {
-        .labeled-card-row-year .year-card .heatmap-area {
-          transform: translate(-10px, 0);
-        }
       }
 
       @media (max-width: 720px) {
@@ -1084,7 +1076,8 @@
           text-align: left;
           margin-left: 0;
         }
-        .labeled-card-row-frequency .labeled-card-title {
+        .labeled-card-row-frequency .labeled-card-title,
+        .labeled-card-row-year .labeled-card-title {
           line-height: 1.15;
           padding-bottom: 2px;
         }
