@@ -89,6 +89,15 @@ function getContentBoxLeft(container) {
   return rect.left + borderLeft + paddingLeft;
 }
 
+function getContentBoxRight(container) {
+  if (!container) return null;
+  const rect = container.getBoundingClientRect();
+  const styles = getComputedStyle(container);
+  const borderRight = parseFloat(styles.borderRightWidth) || 0;
+  const paddingRight = parseFloat(styles.paddingRight) || 0;
+  return rect.right - borderRight - paddingRight;
+}
+
 let textMeasureContext = null;
 
 function measureLabelTextWidth(label, text, styles) {
@@ -168,14 +177,6 @@ function getLeftMostLabelEdge(labels) {
   return Number.isFinite(minLeft) ? minLeft : null;
 }
 
-function parseTranslateX(transformValue) {
-  if (!transformValue || transformValue === "none") return 0;
-  const match = transformValue.match(/translateX\(([-\d.]+)px\)/);
-  if (!match) return 0;
-  const value = parseFloat(match[1]);
-  return Number.isFinite(value) ? value : 0;
-}
-
 function pinStackedStatsToLabelEdge(statsColumn, container, labels) {
   if (!statsColumn) return;
   const offset = getLeftMostLabelOffset(container, labels);
@@ -187,12 +188,33 @@ function pinStackedStatsToLabelEdge(statsColumn, container, labels) {
   statsColumn.style.maxWidth = `calc(100% - ${offset}px)`;
 }
 
-function getCardOuterGap(card, labels) {
-  if (!card || !labels?.length) return null;
-  const cardRect = card.getBoundingClientRect();
+function resetDesktopRightInset(statsColumn) {
+  if (!statsColumn) return;
+  statsColumn.style.marginRight = "";
+}
+
+function balanceDesktopStatsRightInset(statsColumn, container, labels) {
+  if (!statsColumn || !container || !labels?.length) return;
+
+  const containerLeft = getContentBoxLeft(container);
+  const containerRight = getContentBoxRight(container);
   const labelLeft = getLeftMostLabelEdge(labels);
-  if (!Number.isFinite(cardRect.left) || !Number.isFinite(labelLeft)) return null;
-  return Math.max(0, Math.round(labelLeft - cardRect.left));
+  const statsRight = statsColumn.getBoundingClientRect().right;
+  if (
+    !Number.isFinite(containerLeft)
+    || !Number.isFinite(containerRight)
+    || !Number.isFinite(labelLeft)
+    || !Number.isFinite(statsRight)
+  ) {
+    return;
+  }
+
+  const leftGap = labelLeft - containerLeft;
+  const rightGap = containerRight - statsRight;
+  const inset = Math.max(0, Math.round(leftGap - rightGap));
+  if (inset > 0) {
+    statsColumn.style.marginRight = `${inset}px`;
+  }
 }
 
 let frequencyLastViewportWidth = window.innerWidth;
@@ -510,46 +532,22 @@ function applyDesktopStatsRightInset() {
   const desktop = window.matchMedia("(min-width: 721px)").matches;
 
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
+    const body = card.querySelector(".card-body");
     const statsColumn = card.querySelector(".card-stats.side-stats-column");
     const yLabels = Array.from(card.querySelectorAll(".heatmap-area .day-col .day-label"));
-    if (!statsColumn) return;
+    if (!body || !statsColumn) return;
+    resetDesktopRightInset(statsColumn);
     if (!desktop || card.classList.contains("year-card-stacked")) return;
-
-    const leftGap = getCardOuterGap(card, yLabels);
-    if (!Number.isFinite(leftGap)) return;
-
-    const cardRect = card.getBoundingClientRect();
-    const currentRight = statsColumn.getBoundingClientRect().right;
-    if (!Number.isFinite(cardRect.right) || !Number.isFinite(currentRight)) return;
-
-    const targetRight = cardRect.right - leftGap;
-    const delta = Math.round(targetRight - currentRight);
-    if (delta === 0) return;
-
-    const baseShift = parseTranslateX(statsColumn.style.transform);
-    const nextShift = baseShift + delta;
-    statsColumn.style.transform = nextShift === 0 ? "" : `translateX(${nextShift}px)`;
+    balanceDesktopStatsRightInset(statsColumn, body, yLabels);
   });
 
   heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
     const yLabels = Array.from(card.querySelectorAll(".more-stats-body .axis-day-col .axis-y-label"));
     if (!statsColumn) return;
-    card.style.setProperty("--more-stats-facts-shift", "0px");
+    resetDesktopRightInset(statsColumn);
     if (!desktop || card.classList.contains("more-stats-stacked")) return;
-
-    const leftGap = getCardOuterGap(card, yLabels);
-    if (!Number.isFinite(leftGap)) return;
-
-    const cardRect = card.getBoundingClientRect();
-    const currentRight = statsColumn.getBoundingClientRect().right;
-    if (!Number.isFinite(cardRect.right) || !Number.isFinite(currentRight)) return;
-
-    const targetRight = cardRect.right - leftGap;
-    const delta = Math.round(targetRight - currentRight);
-    if (delta !== 0) {
-      card.style.setProperty("--more-stats-facts-shift", `${delta}px`);
-    }
+    balanceDesktopStatsRightInset(statsColumn, card, yLabels);
   });
 }
 
