@@ -80,9 +80,6 @@ function resetStackedStatsOffset(statsColumn) {
   statsColumn.style.maxWidth = "";
 }
 
-let frequencyLastViewportWidth = window.innerWidth;
-let frequencyStackLocks = new Map();
-
 function applyStackedStatsOffset(statsColumn, anchorElement) {
   if (!statsColumn || !anchorElement) return;
 
@@ -194,12 +191,8 @@ function alignFrequencyTitleGapToYearGap() {
 function syncFrequencyStackingMode() {
   if (!heatmaps) return;
   const desktop = window.matchMedia("(min-width: 721px)").matches;
-  const viewportWidth = window.innerWidth;
-  const narrowing = viewportWidth <= frequencyLastViewportWidth;
-  const nextLocks = new Map();
 
-  const cards = Array.from(heatmaps.querySelectorAll(".more-stats"));
-  cards.forEach((card, index) => {
+  heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const body = card.querySelector(".more-stats-body");
     const facts = card.querySelector(".more-stats-facts.side-stats-column");
     if (!body || !facts) return;
@@ -216,18 +209,11 @@ function syncFrequencyStackingMode() {
     const requiredWidth = Math.ceil(body.scrollWidth + sideGap + facts.scrollWidth);
     const availableWidth = Math.floor(card.clientWidth);
     const needsStack = requiredWidth > availableWidth;
-    const wasLocked = frequencyStackLocks.get(index) === true;
-    const keepLocked = wasLocked && narrowing;
-    const shouldStack = needsStack || keepLocked;
 
-    if (shouldStack) {
+    if (needsStack) {
       card.classList.add("more-stats-stacked");
-      nextLocks.set(index, true);
     }
   });
-
-  frequencyStackLocks = nextLocks;
-  frequencyLastViewportWidth = viewportWidth;
 }
 
 function alignFrequencyGraphsToYearCardEdge() {
@@ -335,10 +321,6 @@ function alignStackedStatsToYAxisLabels() {
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
     const anchorGrid = card.querySelector(".axis-matrix-grid");
     if (!graphBody || !statsColumn || !anchorGrid) return;
-    if (card.classList.contains("more-stats-stacked")) {
-      applyStackedStatsOffset(statsColumn, anchorGrid);
-      return;
-    }
 
     const graphBottom = graphBody.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
