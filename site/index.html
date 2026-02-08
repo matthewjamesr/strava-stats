@@ -33,6 +33,8 @@
         --label-gap-rotated: 10px;
         --year-stats-left-offset: calc(var(--heatmap-axis-col) - 3ch);
         --frequency-stats-left-offset: max(0px, calc(var(--axis-width) - 4ch));
+        --labeled-card-padding-top: 18px;
+        --labeled-card-title-gap: 8px;
         --radius: 14px;
         --shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
       }
@@ -400,7 +402,7 @@
 
       .labeled-card-title {
         color: var(--text);
-        margin: 0 0 12px;
+        margin: 0 0 var(--labeled-card-title-gap);
       }
 
       .card {
@@ -412,6 +414,10 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-x: contain;
+      }
+
+      .card-with-labeled-title {
+        padding-top: var(--labeled-card-padding-top);
       }
 
       .card-title {
@@ -536,7 +542,7 @@
       .more-stats > .labeled-card-title {
         grid-column: 1 / -1;
         grid-row: 1;
-        margin: 0 0 12px;
+        margin: 0 0 var(--labeled-card-title-gap);
       }
 
       .more-stats-body {
@@ -900,6 +906,10 @@
       }
 
       @media (max-width: 900px) {
+        :root {
+          --labeled-card-padding-top: 14px;
+          --labeled-card-title-gap: 6px;
+        }
         body {
           padding: 24px 12px;
         }

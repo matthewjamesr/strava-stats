@@ -712,6 +712,9 @@ function buildLabeledCardRow(label, card, kind) {
   if (kind) {
     row.classList.add(`labeled-card-row-${kind}`);
   }
+  if (card?.classList?.contains("card")) {
+    card.classList.add("card-with-labeled-title");
+  }
 
   const title = document.createElement("div");
   title.className = "card-title labeled-card-title";
