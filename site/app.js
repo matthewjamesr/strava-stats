@@ -89,22 +89,58 @@ function getContentBoxLeft(container) {
   return rect.left + borderLeft + paddingLeft;
 }
 
+let textMeasureContext = null;
+
+function measureLabelTextWidth(label, text, styles) {
+  if (!text || !label) return 0;
+  if (!textMeasureContext) {
+    const canvas = document.createElement("canvas");
+    textMeasureContext = canvas.getContext("2d");
+  }
+  if (!textMeasureContext) return 0;
+
+  const font = styles.font && styles.font !== "normal"
+    ? styles.font
+    : `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} / ${styles.lineHeight} ${styles.fontFamily}`;
+  textMeasureContext.font = font;
+
+  let width = textMeasureContext.measureText(text).width;
+  const letterSpacing = parseFloat(styles.letterSpacing);
+  if (Number.isFinite(letterSpacing) && text.length > 1) {
+    width += letterSpacing * (text.length - 1);
+  }
+  return width;
+}
+
 function getLabelTextLeft(label) {
   if (!label) return null;
   const text = (label.textContent || "").trim();
+  const styles = getComputedStyle(label);
   const labelRect = label.getBoundingClientRect();
   if (!text) return Number.isFinite(labelRect.left) ? labelRect.left : null;
 
-  const range = document.createRange();
-  range.selectNodeContents(label);
-  const textRect = range.getBoundingClientRect();
-  if (Number.isFinite(textRect.left) && textRect.width > 0) {
-    return textRect.left;
+  const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+  const borderRight = parseFloat(styles.borderRightWidth) || 0;
+  const paddingLeft = parseFloat(styles.paddingLeft) || 0;
+  const paddingRight = parseFloat(styles.paddingRight) || 0;
+  const contentLeft = labelRect.left + borderLeft + paddingLeft;
+  const contentRight = labelRect.right - borderRight - paddingRight;
+  const contentWidth = Math.max(0, contentRight - contentLeft);
+  const measuredWidth = Math.max(0, measureLabelTextWidth(label, text, styles));
+  const textWidth = Math.min(measuredWidth, contentWidth || measuredWidth);
+
+  const align = styles.textAlign;
+  if (align === "right" || align === "end") {
+    return contentRight - textWidth;
+  }
+  if (align === "center") {
+    return contentLeft + Math.max(0, (contentWidth - textWidth) / 2);
+  }
+  if (align === "left" || align === "start") {
+    return contentLeft;
   }
 
-  if (!Number.isFinite(labelRect.left) || !Number.isFinite(labelRect.width)) return null;
-  const textWidth = Math.max(0, label.scrollWidth);
-  return labelRect.left + Math.max(0, labelRect.width - textWidth);
+  return contentLeft;
 }
 
 function getLeftMostLabelOffset(container, labels) {
