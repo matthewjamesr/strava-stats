@@ -24,16 +24,18 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    git clone https://github.com/<your-username>/<repo-name>.git
    cd <repo-name>
    ```
-3. Create a [Strava API application](https://www.strava.com/settings/api). Set **Authorization Callback Domain** to `localhost`, then copy:
+3. Create a [Strava API application](https://www.strava.com/settings/api).
+   - Set **Website**, for example https://github.com/aspain/git-sweaty
+   - Set **Authorization Callback Domain** to `localhost`, then copy:
    - `STRAVA_CLIENT_ID`
    - `STRAVA_CLIENT_SECRET`
-4. Make sure GitHub CLI is authenticated:
+5. Make sure GitHub CLI is authenticated:
 
    ```bash
    gh auth login
    ```
 
-5. Run:
+6. Run:
 
    ```bash
    python3 scripts/setup_auth.py --client-id STRAVA_CLIENT_ID
@@ -46,14 +48,14 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    - capture the callback code locally
    - exchange it for a refresh token
    - set `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, and `STRAVA_REFRESH_TOKEN` via `gh secret set`
-6. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
+7. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
-7. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
+8. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
    - If GitHub shows an **Enable workflows** button in [Actions](../../actions), click it first.
    - Go to [Actions](../../actions) → [Sync Strava Heatmaps](../../actions/workflows/sync.yml) → **Run workflow**.
    - Keep **Update README dashboard URL in this fork** enabled on your first run so your README link is personalized automatically.
    - The same workflow is also scheduled in `.github/workflows/sync.yml` (daily at `15:00 UTC`).
-8. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
+9. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
 
 ### Option 2: Manual setup (no local clone required)
 
