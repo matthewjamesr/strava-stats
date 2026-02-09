@@ -2124,10 +2124,6 @@ async function init() {
       return;
     }
     selectedTypes.add(value);
-    if (selectedTypes.size === payload.types.length) {
-      allTypesMode = true;
-      selectedTypes.clear();
-    }
   }
 
   function toggleYear(value) {
@@ -2151,7 +2147,17 @@ async function init() {
       return;
     }
     selectedYears.add(year);
-    if (selectedYears.size === currentVisibleYears.length) {
+  }
+
+  function finalizeTypeSelection() {
+    if (!areAllTypesSelected() && selectedTypes.size === payload.types.length) {
+      allTypesMode = true;
+      selectedTypes.clear();
+    }
+  }
+
+  function finalizeYearSelection() {
+    if (!areAllYearsSelected() && selectedYears.size === currentVisibleYears.length) {
       allYearsMode = true;
       selectedYears.clear();
     }
@@ -2227,7 +2233,9 @@ async function init() {
       },
     );
     renderMenuDoneButton(typeMenuOptions, () => {
+      finalizeTypeSelection();
       setMenuOpen(typeMenu, typeMenuButton, false);
+      update();
     });
     renderMenuOptions(
       yearMenuOptions,
@@ -2241,7 +2249,9 @@ async function init() {
       (v) => Number(v),
     );
     renderMenuDoneButton(yearMenuOptions, () => {
+      finalizeYearSelection();
       setMenuOpen(yearMenu, yearMenuButton, false);
+      update();
     });
     const years = selectedYearsList(visibleYears);
     if (!years.length) {
