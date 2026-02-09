@@ -327,6 +327,7 @@
         display: grid;
         grid-template-rows: auto 1fr;
         align-items: center;
+        justify-items: center; /* prevents full-width stretch that moves the dot left */
       }
 
       .summary-card-action {
@@ -368,6 +369,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        width: max-content;   /* shrink-wrap so the dot sits next to the number */
+        margin: 0 auto;       /* keep centered within the card */
         font-size: clamp(16px, 1.9vw, 20px);
         font-weight: 600;
         line-height: 1.1;
