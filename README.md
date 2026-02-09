@@ -27,8 +27,8 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 3. Create a [Strava API application](https://www.strava.com/settings/api).
    - Set **Website**, for example https://github.com/aspain/git-sweaty
    - Set **Authorization Callback Domain** to `localhost`, then copy:
-   - `STRAVA_CLIENT_ID`
-   - `STRAVA_CLIENT_SECRET`
+   - The `Client ID` value
+   - The `Client Secret` value
 5. Make sure GitHub CLI is authenticated:
 
    ```bash
@@ -41,13 +41,13 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    python3 scripts/setup_auth.py --client-id STRAVA_CLIENT_ID
    ```
 
-   When prompted, paste `STRAVA_CLIENT_SECRET` (it is hidden input).
+   When prompted, paste your `Client Secret` value (it is hidden input).
 
    The script will:
    - open Strava OAuth in your browser
    - capture the callback code locally
    - exchange it for a refresh token
-   - set `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, and `STRAVA_REFRESH_TOKEN` via `gh secret set`
+   - set `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, and `STRAVA_REFRESH_TOKEN` as secrets in your repo, via `gh secret set`
 7. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
 8. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
@@ -62,8 +62,8 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 1. Fork this repo to your account: [Fork this repository](../../fork)
 
 2. Create a [Strava API application](https://www.strava.com/settings/api). Set **Authorization Callback Domain** to `localhost`, then copy:
-   - `STRAVA_CLIENT_ID`
-   - `STRAVA_CLIENT_SECRET`
+   - The `Client ID` value
+   - The `Client Secret` value
 
 3. Generate a **refresh token** via OAuth (the token shown on the Strava API page often does **not** work).
    Open this URL in your browser (replace `CLIENT_ID` with the Client ID value from your Strava API application page):
@@ -81,7 +81,7 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 
    Copy the value of the `code` query parameter from the failed URL (in this example, `12345`) and exchange it.
    Run this command in a terminal app (macOS/Linux Terminal, or Windows PowerShell/Command Prompt).
-   Use the `CLIENT_ID` and `CLIENT_SECRET` values from your Strava API application page in Step 2.
+   Use the `Client ID` and `Client Secret` values from your Strava API application page in Step 2.
 
    ```bash
    curl -X POST https://www.strava.com/oauth/token \
@@ -94,9 +94,9 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    Copy the `refresh_token` from the response.
 
 4. Add GitHub secrets (repo → [Settings → Secrets and variables → Actions](../../settings/secrets/actions)):
-   - `STRAVA_CLIENT_ID`
-   - `STRAVA_CLIENT_SECRET`
-   - `STRAVA_REFRESH_TOKEN` (from the OAuth exchange above)
+   - `STRAVA_CLIENT_ID` (the `Client ID` value from step 2 above)
+   - `STRAVA_CLIENT_SECRET` (the `Client Secret` value from step 2 above)
+   - `STRAVA_REFRESH_TOKEN` (from the step 3 OAuth exchange above)
 
 5. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
