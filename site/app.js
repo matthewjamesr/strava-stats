@@ -2019,6 +2019,7 @@ async function init() {
       const isActive = rawValue === "all"
         ? isAllSelected
         : (!isAllSelected && selectedValues.has(normalized));
+      const isChecked = isAllSelected || isActive;
 
       const row = document.createElement("button");
       row.type = "button";
@@ -2035,7 +2036,7 @@ async function init() {
       const check = document.createElement("input");
       check.type = "checkbox";
       check.className = "filter-menu-check";
-      check.checked = isActive;
+      check.checked = isChecked;
       check.tabIndex = -1;
       check.setAttribute("aria-hidden", "true");
 
