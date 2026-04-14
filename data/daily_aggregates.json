@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-13T16:13:17.890614+00:00",
+  "generated_at": "2026-04-14T16:08:08.437488+00:00",
   "years": {
     "2016": {
       "Run": {
@@ -6319,12 +6319,22 @@
         },
         "2026-04-13": {
           "activity_ids": [
-            18090889695
+            18090889695,
+            18093948621
+          ],
+          "count": 2,
+          "distance": 15471.5,
+          "elevation_gain": 13.0,
+          "moving_time": 2449.0
+        },
+        "2026-04-14": {
+          "activity_ids": [
+            18104280457
           ],
           "count": 1,
-          "distance": 3855.5,
+          "distance": 3788.4,
           "elevation_gain": 2.0,
-          "moving_time": 698.0
+          "moving_time": 644.0
         }
       },
       "Run": {
@@ -6554,6 +6564,17 @@
           "distance": 2144.3,
           "elevation_gain": 16.0,
           "moving_time": 2249.0
+        }
+      },
+      "WeightTraining": {
+        "2026-04-13": {
+          "activity_ids": [
+            18093436318
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 1910.0
         }
       }
     }
