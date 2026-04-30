@@ -5249,6 +5249,13 @@
       "subtype": "WeightTraining",
       "type": "WeightTraining",
       "year": 2026
+    },
+    {
+      "date": "2026-04-29",
+      "hour": 11,
+      "subtype": "WeightTraining",
+      "type": "WeightTraining",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -11883,11 +11890,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 3014.0
+        },
+        "2026-04-29": {
+          "activity_ids": [
+            18308926484
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 2760.0
         }
       }
     }
   },
-  "generated_at": "2026-04-29T16:27:26.145118+00:00",
+  "generated_at": "2026-04-30T16:19:10.283972+00:00",
   "other_bucket": "OtherSports",
   "type_meta": {
     "GymCardio": {
