@@ -5277,6 +5277,13 @@
       "subtype": "Run",
       "type": "Run",
       "year": 2026
+    },
+    {
+      "date": "2026-05-13",
+      "hour": 19,
+      "subtype": "Run",
+      "type": "Run",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -11844,6 +11851,15 @@
           "distance": 5640.1,
           "elevation_gain": 12.0,
           "moving_time": 1968.0
+        },
+        "2026-05-13": {
+          "activity_ids": [
+            18498227078
+          ],
+          "count": 1,
+          "distance": 6444.3,
+          "elevation_gain": 26.0,
+          "moving_time": 2106.0
         }
       },
       "WalkHike": {
@@ -11951,7 +11967,7 @@
       }
     }
   },
-  "generated_at": "2026-05-13T17:16:22.023451+00:00",
+  "generated_at": "2026-05-14T17:01:26.509729+00:00",
   "other_bucket": "OtherSports",
   "type_meta": {
     "GymCardio": {
